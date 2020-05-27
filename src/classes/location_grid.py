@@ -11,7 +11,6 @@ class LocationGrid:
     __axis_font_size: str
     __x_axis_angle: int
     __alignment: str
-    __block_graph_intervals: list
     __block_graph_data: list
     __block_graph_data_formatted: list
     __grid_size: float
@@ -50,8 +49,8 @@ class LocationGrid:
                          " threshold")
 
         color_map = colors.ListedColormap(['blue', 'red'])
-        bounds = [0, float(self.__block_df.quantile(self.__threshold, axis=1)),
-                  int(self.__block_df.max(axis=1))]
+        bounds = [0, float(self.__block_df["Crime Count"].quantile(self.__threshold)),
+                  int(self.__block_df["Crime Count"].max())]
         norm = colors.BoundaryNorm(bounds, color_map.N)
 
         block_plot.imshow(np.array(self.__block_graph_data_formatted), cmap=color_map, norm=norm, aspect="auto",
@@ -117,7 +116,6 @@ class LocationGrid:
         self.__x_axis_ticks = np.arange(self.__area_coordinates[0], self.__area_coordinates[2], self.__grid_size)
         self.__y_axis_ticks = np.arange(self.__area_coordinates[1], self.__area_coordinates[3], self.__grid_size)
 
-        self.__block_graph_intervals = []
         self.__block_graph_data = []
         self.__block_graph_data_formatted = []
 
@@ -130,31 +128,28 @@ class LocationGrid:
                 right_boundary = self.__x_axis_ticks[i + 1] if i != len(self.__x_axis_ticks) - 1 \
                     else x_coord + self.__grid_size
 
-                self.__block_graph_intervals.append([left_boundary, bottom_boundary, right_boundary, top_boundary])
+                self.__block_graph_data.append([])
+                self.__block_graph_data[(j * len(self.__x_axis_ticks)) + i]\
+                    .append([left_boundary, bottom_boundary, right_boundary, top_boundary])
+                self.__block_graph_data[(j * len(self.__x_axis_ticks)) + i] \
+                    .append(0)
 
-        for i, block in enumerate(self.__block_graph_intervals):
-            self.__block_graph_data.append(0)
+                for point in self.__crime_df["Coordinates"]:
+                    if (left_boundary <= point[0] < right_boundary) and (bottom_boundary <= point[1] < top_boundary):
+                        self.__block_graph_data[(j * len(self.__x_axis_ticks)) + i][1] += 1
 
-            for point in self.__crime_df["Coordinates"]:
-                if (block[0] <= point[0] < block[2]) and (block[1] <= point[1] < block[3]):
-                    self.__block_graph_data[i] += 1
-
-        for i, block in enumerate(self.__block_graph_intervals):
+        for i, element in enumerate(self.__block_graph_data):
             if i % len(self.__x_axis_ticks) == 0:
                 self.__block_graph_data_formatted.append([])
-            self.__block_graph_data_formatted[math.floor(i / len(self.__x_axis_ticks))].append(0)
 
-            for point in self.__crime_df["Coordinates"]:
-                if (block[0] <= point[0] < block[2]) and (block[1] <= point[1] < block[3]):
-                    self.__block_graph_data_formatted[math.floor(i / len(self.__x_axis_ticks))][
-                        i % len(self.__x_axis_ticks)] += 1
+            self.__block_graph_data_formatted[math.floor(i / len(self.__x_axis_ticks))].append(element[1])
 
-        self.__block_df = pd.DataFrame(columns=[str(x)[1:-2] for x in self.__block_graph_intervals],
-                                       data=np.array([self.__block_graph_data]))
+        self.__block_df = pd.DataFrame(columns=["Blocks", "Crime Count"],
+                                       data=self.__block_graph_data)
 
-        self.__crime_count = int(self.__block_df.sum(axis=1))
-        self.__crime_mean = float(self.__block_df.mean(axis=1))
-        self.__crime_standard_deviation = float(self.__block_df.std(axis=1))
+        self.__crime_count = self.__block_df["Crime Count"].sum()
+        self.__crime_mean = self.__block_df["Crime Count"].mean()
+        self.__crime_standard_deviation = self.__block_df["Crime Count"].std()
 
     @property
     def threshold(self) -> float:
