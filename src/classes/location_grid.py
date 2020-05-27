@@ -205,6 +205,14 @@ class LocationGrid:
         self.__threshold = threshold if 0 <= threshold <= 1 else 0.5
 
     @property
+    def blocked_blocks(self):
+        return self.__blocked_blocks
+
+    @property
+    def invalid_coordinates(self):
+        return self.__invalid_coordinates
+
+    @property
     def crime_count(self) -> int:
         return self.__crime_count
 
