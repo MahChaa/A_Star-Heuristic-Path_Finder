@@ -13,6 +13,8 @@ class LocationGrid:
     __alignment: str
     __block_graph_data: list
     __block_graph_data_formatted: list
+    __blocked_blocks: list
+    __invalid_coordinates: list
     __grid_size: float
     __threshold: float
     __x_axis_ticks: np.ndarray
@@ -99,6 +101,52 @@ class LocationGrid:
                    size=self.__axis_font_size)
         plt.yticks(self.__y_axis_ticks, size=self.__axis_font_size)
 
+    def set_coordinates_validity(self):
+        threshold = float(self.__block_df["Crime Count"].quantile(self.__threshold))
+        self.__blocked_blocks = []
+        self.__invalid_coordinates = []
+
+        for block_data in self.__block_graph_data:
+            if block_data[1] > threshold:
+                self.__blocked_blocks.append(block_data[0])
+
+        for i in range(len(self.__y_axis_ticks) + 1):
+            y_coord = self.__y_axis_ticks[i] if i < len(self.__y_axis_ticks)\
+                else self.__y_axis_ticks[i - 1] + self.__grid_size
+
+            for j in range(len(self.__x_axis_ticks) + 1):
+                x_coord = self.__x_axis_ticks[j] if j < len(self.__x_axis_ticks)\
+                    else self.__x_axis_ticks[j - 1] + self.__grid_size
+                coords = (x_coord, y_coord)
+                block_adjacency_count = 0
+
+                if 0 < i < len(self.__y_axis_ticks) and 0 < j < len(self.__x_axis_ticks):
+                    for block in self.__blocked_blocks:
+                        if x_coord in block and y_coord in block:
+                            block_adjacency_count += 1
+
+                    if block_adjacency_count >= 4:
+                        self.__invalid_coordinates.append(coords)
+
+                elif (i == 0 or i == len(self.__y_axis_ticks)) != (j == 0 or j == len(self.__x_axis_ticks)):    # XOR
+                    for block in self.__blocked_blocks:
+                        if x_coord in block and y_coord in block:
+                            block_adjacency_count += 1
+
+                    if block_adjacency_count >= 2:
+                        self.__invalid_coordinates.append(coords)
+
+                else:
+                    for block in self.__blocked_blocks:
+                        if x_coord in block and y_coord in block:
+                            block_adjacency_count += 1
+
+                    if block_adjacency_count >= 1:
+                        self.__invalid_coordinates.append(coords)
+
+        print(self.__blocked_blocks, len(self.__blocked_blocks), self.__invalid_coordinates,
+              len(self.__invalid_coordinates), sep="\n")
+
     def windowed_graph(self, val: bool) -> None:
         matplotlib.use("TkAgg" if val else "module://backend_interagg")
 
@@ -119,7 +167,7 @@ class LocationGrid:
         self.__block_graph_data = []
         self.__block_graph_data_formatted = []
 
-        for j in range(0, len(self.__x_axis_ticks)):
+        for j in range(len(self.__x_axis_ticks)):
             bottom_boundary = self.__y_axis_ticks[-j - 1]
             top_boundary = self.__y_axis_ticks[-j] if j != 0 else bottom_boundary + self.__grid_size
 
