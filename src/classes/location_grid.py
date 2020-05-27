@@ -144,9 +144,6 @@ class LocationGrid:
                     if block_adjacency_count >= 1:
                         self.__invalid_coordinates.append(coords)
 
-        print(self.__blocked_blocks, len(self.__blocked_blocks), self.__invalid_coordinates,
-              len(self.__invalid_coordinates), sep="\n")
-
     def windowed_graph(self, val: bool) -> None:
         matplotlib.use("TkAgg" if val else "module://backend_interagg")
 
