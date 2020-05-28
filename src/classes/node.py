@@ -49,6 +49,8 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
         closed_list.append(current_node)
 
         if current_node == final_node:
+            print("\nThe cost of the shortest path: " + str(current_node.g))
+
             while current_node != initial_node:
                 path.append(current_node)
 
