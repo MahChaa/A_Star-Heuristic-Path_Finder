@@ -205,12 +205,20 @@ class LocationGrid:
         self.__threshold = threshold if 0 <= threshold <= 1 else 0.5
 
     @property
-    def blocked_blocks(self):
+    def blocked_blocks(self) -> list:
         return self.__blocked_blocks
 
     @property
-    def invalid_coordinates(self):
+    def invalid_coordinates(self) -> list:
         return self.__invalid_coordinates
+
+    @property
+    def x_axis_ticks(self) -> np.ndarray:
+        return self.__x_axis_ticks
+
+    @property
+    def y_axis_ticks(self) -> np.ndarray:
+        return self.__y_axis_ticks
 
     @property
     def crime_count(self) -> int:
