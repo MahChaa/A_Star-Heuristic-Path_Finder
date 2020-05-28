@@ -38,6 +38,8 @@ class LocationGrid:
 
         self.windowed_graph(True)
 
+        self.__search_path_data = []
+
         self.threshold = threshold
         self.grid_size = grid_size
 
@@ -50,14 +52,21 @@ class LocationGrid:
             fig.suptitle("Block Graph: " + str(self.__grid_size) + " grid size; " + str(self.__threshold) +
                          " threshold")
 
-        color_map = colors.ListedColormap(['blue', 'red'])
+        color_map = colors.ListedColormap(['indigo', 'yellow'])
         bounds = [0, float(self.__block_df["Crime Count"].quantile(self.__threshold)),
                   int(self.__block_df["Crime Count"].max())]
         norm = colors.BoundaryNorm(bounds, color_map.N)
 
+        plt.grid(True, linewidth=1.5, color="k")
+
         block_plot.imshow(np.array(self.__block_graph_data_formatted), cmap=color_map, norm=norm, aspect="auto",
-                          extent=[self.__area_coordinates[0], self.__area_coordinates[2],
-                                  self.__area_coordinates[1], self.__area_coordinates[3]])
+                          extent=[self.__x_axis_ticks[0], self.__x_axis_ticks[-1] + self.__grid_size,
+                                  self.__y_axis_ticks[0], self.__y_axis_ticks[-1] + self.__grid_size])
+
+        if self.__search_path_data:
+            plt.plot([coord.coordinates[0] for coord in self.__search_path_data],
+                     [coord.coordinates[1] for coord in self.__search_path_data],
+                     color="red", linewidth=2)
 
         self.__set_axis_ticks()
 
@@ -111,11 +120,11 @@ class LocationGrid:
                 self.__blocked_blocks.append(block_data[0])
 
         for i in range(len(self.__y_axis_ticks) + 1):
-            y_coord = self.__y_axis_ticks[i] if i < len(self.__y_axis_ticks)\
+            y_coord = self.__y_axis_ticks[i] if i < len(self.__y_axis_ticks) \
                 else self.__y_axis_ticks[i - 1] + self.__grid_size
 
             for j in range(len(self.__x_axis_ticks) + 1):
-                x_coord = self.__x_axis_ticks[j] if j < len(self.__x_axis_ticks)\
+                x_coord = self.__x_axis_ticks[j] if j < len(self.__x_axis_ticks) \
                     else self.__x_axis_ticks[j - 1] + self.__grid_size
                 coords = (x_coord, y_coord)
                 block_adjacency_count = 0
@@ -128,7 +137,7 @@ class LocationGrid:
                     if block_adjacency_count >= 4:
                         self.__invalid_coordinates.append(coords)
 
-                elif (i == 0 or i == len(self.__y_axis_ticks)) != (j == 0 or j == len(self.__x_axis_ticks)):    # XOR
+                elif (i == 0 or i == len(self.__y_axis_ticks)) != (j == 0 or j == len(self.__x_axis_ticks)):  # XOR
                     for block in self.__blocked_blocks:
                         if x_coord in block and y_coord in block:
                             block_adjacency_count += 1
@@ -174,7 +183,7 @@ class LocationGrid:
                     else x_coord + self.__grid_size
 
                 self.__block_graph_data.append([])
-                self.__block_graph_data[(j * len(self.__x_axis_ticks)) + i]\
+                self.__block_graph_data[(j * len(self.__x_axis_ticks)) + i] \
                     .append([left_boundary, bottom_boundary, right_boundary, top_boundary])
                 self.__block_graph_data[(j * len(self.__x_axis_ticks)) + i] \
                     .append(0)
@@ -231,3 +240,6 @@ class LocationGrid:
     @property
     def crime_standard_deviation(self) -> float:
         return self.__crime_standard_deviation
+
+    def update_path_data(self, path: list):
+        self.__search_path_data = path
