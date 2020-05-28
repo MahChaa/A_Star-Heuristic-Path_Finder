@@ -70,9 +70,17 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
                 next_node.f = next_node.h + next_node.g
 
                 if open_list.qsize() > 0:
+                    exists = False
                     for node in open_list.queue:
-                        if next_node == node and next_node.f < node.f:
-                            open_list.put_nowait(next_node)
+                        if next_node == node:
+                            exists = True
+
+                            if next_node.f < node.f:
+                                open_list.put_nowait(next_node)
+                                break
+
+                    if not exists:
+                        open_list.put_nowait(next_node)
                 else:
                     open_list.put_nowait(next_node)
 
@@ -86,70 +94,218 @@ def find_valid_moves(x_coord, y_coord, graph) -> list:
     if x_coord != graph.x_axis_ticks[0] and x_coord != graph.x_axis_ticks[-1] + graph.grid_size \
             and y_coord != graph.y_axis_ticks[0] and y_coord != graph.y_axis_ticks[-1] + graph.grid_size:
         if (x_coord, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord, y_coord + graph.grid_size))
+            adjacent_blocks = 0
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord in block and y_coord + graph.grid_size in block:
+                    adjacent_blocks += 1
+
+                    if adjacent_blocks >= 2:
+                        break
+
+            if adjacent_blocks < 2:
+                possible_moves.append((x_coord, y_coord + graph.grid_size))
 
         if (x_coord + graph.grid_size, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord + graph.grid_size, y_coord + graph.grid_size))
+            valid = True
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord + graph.grid_size in block \
+                        and y_coord + graph.grid_size in block:
+                    valid = False
+                    break
+
+            if valid:
+                possible_moves.append((x_coord + graph.grid_size, y_coord + graph.grid_size))
 
         if (x_coord + graph.grid_size, y_coord) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord + graph.grid_size, y_coord))
+            adjacent_blocks = 0
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord + graph.grid_size in block and y_coord in block:
+                    adjacent_blocks += 1
+
+                    if adjacent_blocks >= 2:
+                        break
+
+            if adjacent_blocks < 2:
+                possible_moves.append((x_coord + graph.grid_size, y_coord))
 
         if (x_coord + graph.grid_size, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord + graph.grid_size, y_coord - graph.grid_size))
+            valid = True
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord + graph.grid_size in block \
+                        and y_coord - graph.grid_size in block:
+                    valid = False
+                    break
+
+            if valid:
+                possible_moves.append((x_coord + graph.grid_size, y_coord - graph.grid_size))
 
         if (x_coord, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord, y_coord - graph.grid_size))
+            adjacent_blocks = 0
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord in block and y_coord - graph.grid_size in block:
+                    adjacent_blocks += 1
+
+                    if adjacent_blocks >= 2:
+                        break
+
+            if adjacent_blocks < 2:
+                possible_moves.append((x_coord, y_coord - graph.grid_size))
 
         if (x_coord - graph.grid_size, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord - graph.grid_size, y_coord - graph.grid_size))
+            valid = True
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord - graph.grid_size in block \
+                        and y_coord - graph.grid_size in block:
+                    valid = False
+                    break
+
+            if valid:
+                possible_moves.append((x_coord - graph.grid_size, y_coord - graph.grid_size))
 
         if (x_coord - graph.grid_size, y_coord) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord - graph.grid_size, y_coord))
+            adjacent_blocks = 0
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord - graph.grid_size in block and y_coord in block:
+                    adjacent_blocks += 1
+
+                    if adjacent_blocks >= 2:
+                        break
+
+            if adjacent_blocks < 2:
+                possible_moves.append((x_coord - graph.grid_size, y_coord))
 
         if (x_coord - graph.grid_size, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-            possible_moves.append((x_coord - graph.grid_size, y_coord + graph.grid_size))
+            valid = True
+
+            for block in graph.blocked_blocks:
+                if x_coord in block and y_coord in block and x_coord - graph.grid_size in block \
+                        and y_coord + graph.grid_size in block:
+                    valid = False
+                    break
+
+            if valid:
+                possible_moves.append((x_coord - graph.grid_size, y_coord + graph.grid_size))
 
     elif (x_coord == graph.x_axis_ticks[0] or x_coord == graph.x_axis_ticks[-1] + graph.grid_size) \
             != (y_coord == graph.y_axis_ticks[0] or y_coord == graph.y_axis_ticks[-1] + graph.grid_size):
         if y_coord == graph.y_axis_ticks[0]:
             if (x_coord - graph.grid_size, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord - graph.grid_size, y_coord + graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord - graph.grid_size in block \
+                            and y_coord + graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord - graph.grid_size, y_coord + graph.grid_size))
 
             if (x_coord, y_coord + graph.grid_size) not in graph.invalid_coordinates:
                 possible_moves.append((x_coord, y_coord + graph.grid_size))
 
             if (x_coord + graph.grid_size, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord + graph.grid_size, y_coord + graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord + graph.grid_size in block \
+                            and y_coord + graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord + graph.grid_size, y_coord + graph.grid_size))
 
         elif y_coord == graph.y_axis_ticks[-1] + graph.grid_size:
             if (x_coord + graph.grid_size, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord + graph.grid_size, y_coord - graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord + graph.grid_size in block \
+                            and y_coord - graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord + graph.grid_size, y_coord - graph.grid_size))
 
             if (x_coord, y_coord - graph.grid_size) not in graph.invalid_coordinates:
                 possible_moves.append((x_coord, y_coord - graph.grid_size))
 
             if (x_coord - graph.grid_size, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord - graph.grid_size, y_coord - graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord - graph.grid_size in block \
+                            and y_coord - graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord - graph.grid_size, y_coord - graph.grid_size))
 
         elif x_coord == graph.x_axis_ticks[0]:
             if (x_coord + graph.grid_size, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord + graph.grid_size, y_coord + graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord + graph.grid_size in block \
+                            and y_coord + graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord + graph.grid_size, y_coord + graph.grid_size))
 
             if (x_coord + graph.grid_size, y_coord) not in graph.invalid_coordinates:
                 possible_moves.append((x_coord + graph.grid_size, y_coord))
 
             if (x_coord + graph.grid_size, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord + graph.grid_size, y_coord - graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord + graph.grid_size in block \
+                            and y_coord - graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord + graph.grid_size, y_coord - graph.grid_size))
 
         else:
             if (x_coord - graph.grid_size, y_coord - graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord - graph.grid_size, y_coord - graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord - graph.grid_size in block \
+                            and y_coord - graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord - graph.grid_size, y_coord - graph.grid_size))
 
             if (x_coord - graph.grid_size, y_coord) not in graph.invalid_coordinates:
                 possible_moves.append((x_coord - graph.grid_size, y_coord))
 
             if (x_coord - graph.grid_size, y_coord + graph.grid_size) not in graph.invalid_coordinates:
-                possible_moves.append((x_coord - graph.grid_size, y_coord + graph.grid_size))
+                valid = True
+
+                for block in graph.blocked_blocks:
+                    if x_coord in block and y_coord in block and x_coord - graph.grid_size in block \
+                            and y_coord + graph.grid_size in block:
+                        valid = False
+                        break
+
+                if valid:
+                    possible_moves.append((x_coord - graph.grid_size, y_coord + graph.grid_size))
 
     else:
         if x_coord == graph.x_axis_ticks[0] and y_coord == graph.y_axis_ticks[0]:
