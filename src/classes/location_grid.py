@@ -122,7 +122,7 @@ class LocationGrid:
 
                 if 0 < i < len(self.__y_axis_ticks) and 0 < j < len(self.__x_axis_ticks):
                     for block in self.__blocked_blocks:
-                        if x_coord in block and y_coord in block:
+                        if x_coord and y_coord in block:
                             block_adjacency_count += 1
 
                     if block_adjacency_count >= 4:
@@ -130,7 +130,7 @@ class LocationGrid:
 
                 elif (i == 0 or i == len(self.__y_axis_ticks)) != (j == 0 or j == len(self.__x_axis_ticks)):    # XOR
                     for block in self.__blocked_blocks:
-                        if x_coord in block and y_coord in block:
+                        if x_coord and y_coord in block:
                             block_adjacency_count += 1
 
                     if block_adjacency_count >= 2:
@@ -138,7 +138,7 @@ class LocationGrid:
 
                 else:
                     for block in self.__blocked_blocks:
-                        if x_coord in block and y_coord in block:
+                        if x_coord and y_coord in block:
                             block_adjacency_count += 1
 
                     if block_adjacency_count >= 1:
