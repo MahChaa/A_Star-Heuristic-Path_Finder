@@ -1,5 +1,6 @@
 import math
 import queue as Q
+import time
 
 from classes.location_grid import LocationGrid
 
@@ -30,12 +31,15 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
     end_coords = check_coordinates_validity(end_coords, graph)
 
     if start_coords in graph.invalid_coordinates or end_coords in graph.invalid_coordinates:
+        print("\nDue to blocks, no path was found. Please change the points and try again.")
         return []
 
     initial_node = Node(None, start_coords)
     final_node = Node(None, end_coords)
     current_node: Node
     path = []
+
+    search_time = time.time()
 
     open_list.put_nowait(initial_node)
 
@@ -84,6 +88,11 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
                 else:
                     open_list.put_nowait(next_node)
 
+        if time.time() - search_time > 10:
+            print("Time is up. The optimal path was not found.")
+            break
+
+    print("\nDue to blocks, no path was found. Please change the points and try again.")
     return []
 
 

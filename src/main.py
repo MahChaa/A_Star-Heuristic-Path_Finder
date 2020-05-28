@@ -87,8 +87,6 @@ def main():
 
             print("\nYou will have to close the graph window to continue.")
             plt.show(block=True)
-        else:
-            print("\nNo path was found between the start point and end point.")
 
         user = input("\nWould you like to change start again with different start and end points?"
                      "\nThe program will terminate if you decline. (y/n) ")
