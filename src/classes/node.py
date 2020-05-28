@@ -12,11 +12,14 @@ class Node:
         self.g = 0
         self.h = 0
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.coordinates == other.coordinates
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         return self.f < other.f
+
+    def __repr__(self) -> str:
+        return str(self.coordinates)
 
 
 def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple) -> list:
@@ -26,10 +29,15 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
     start_coords = check_coordinates_validity(start_coords, graph)
     end_coords = check_coordinates_validity(end_coords, graph)
 
+    if start_coords in graph.invalid_coordinates or end_coords in graph.invalid_coordinates:
+        return []
+
     initial_node = Node(None, start_coords)
     final_node = Node(None, end_coords)
     current_node: Node
     path = []
+
+    open_list.put_nowait(initial_node)
 
     while open_list.qsize() > 0:
         current_node = open_list.get_nowait()
@@ -61,9 +69,14 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
                 next_node.g = current_node.g + move_cost
                 next_node.f = next_node.h + next_node.g
 
-                for node in open_list.queue:
-                    if next_node == node and next_node.f < node.f:
-                        open_list.put_nowait(next_node)
+                if open_list.qsize() > 0:
+                    for node in open_list.queue:
+                        if next_node == node and next_node.f < node.f:
+                            open_list.put_nowait(next_node)
+                else:
+                    open_list.put_nowait(next_node)
+
+    return []
 
 
 # noinspection DuplicatedCode
@@ -162,7 +175,7 @@ def find_valid_moves(x_coord, y_coord, graph) -> list:
 def get_move_cost(source, target, graph) -> float:
     if source[0] == target[0] or source[1] == target[1]:
         for block in graph.blocked_blocks:
-            if source[0] and source[1] and target[0] and target[1] in block:
+            if source[0] in block and source[1] in block and target[0] in block and target[1] in block:
                 return 1.3
         return 1
     else:
@@ -173,13 +186,25 @@ def check_coordinates_validity(coords: tuple, graph) -> tuple:
     x_coord = coords[0]
     y_coord = coords[1]
 
-    if x_coord not in graph.x_axis_ticks:
+    if x_coord >= 0:
+        if x_coord >= len(graph.x_axis_ticks):
+            x_coord = graph.x_axis_ticks[-1] + graph.grid_size
+        else:
+            x_coord = graph.x_axis_ticks[int(x_coord)]
+
+    elif x_coord not in graph.x_axis_ticks:
         for i, tick in enumerate(graph.x_axis_ticks):
             if x_coord < tick:
                 x_coord = graph.x_axis_ticks[i - 1]
                 break
 
-    if y_coord not in graph.y_axis_ticks:
+    if y_coord >= 0 < graph.y_axis_ticks[0]:
+        if y_coord >= len(graph.y_axis_ticks):
+            y_coord = graph.y_axis_ticks[-1] + graph.grid_size
+        else:
+            y_coord = graph.y_axis_ticks[int(y_coord)]
+
+    elif y_coord not in graph.y_axis_ticks:
         for i, tick in enumerate(graph.y_axis_ticks):
             if y_coord < tick:
                 y_coord = graph.y_axis_ticks[i - 1]
