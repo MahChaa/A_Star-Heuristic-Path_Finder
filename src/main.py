@@ -33,7 +33,7 @@ def main():
         plt.show(block=True)
 
         user = input("\nWould you like to change the grid size and print the new graphs?"
-                     "\nYou will not be able to change the grid size and threshold anymore if you continue. (y/n) ")
+                     "\nYou will not be able to change the grid size and threshold anymore if you decline. (y/n) ")
 
         if str.lower(user)[0] == "n":
             break
@@ -51,37 +51,47 @@ def main():
 
         print("\nTime to generate data: %.3f seconds" % (time.time() - loading_time))
 
+    lg.set_coordinates_validity()
+
     lg.windowed_graph(False)
 
     lg.show_scatter()
 
     lg.show_block()
 
+    lg.windowed_graph(True)
+
+    print("\nTime to select start and end coordinates for the search.")
+
     while True:
-        path = informed_search(lg,
-                               (
-                                   float(input("\nTime to select start and end coordinates for the search.\n"
-                                               "You can use any coordinates within the graph, "
-                                               "but you could also select specific x and y ticks.\n"
-                                               "To select ticks, enter their order in the graph "
-                                               "eg: x=0 and y=0 is the bottom left point.\n"
-                                               "Remember, there is no user input validation, "
-                                               "I assume you know what you're doing.\n"
-                                               "Enter the starting x coordinate: ")),
-                                   float(input("Enter the starting y coordinate: "))
-                               ),
-                               (
-                                   float(input("Enter the end x coordinate: ")),
-                                   float(input("Enter the end y coordinate: "))
-                               ))
+        start_x = float(input("\nYou can use any coordinates within the graph, "
+                              "but you could also select specific x and y ticks.\n"
+                              "To select ticks, enter their order in the graph "
+                              "eg: x=0 and y=0 is the bottom left point.\n"
+                              "Remember, there is no user input validation, "
+                              "I assume you know what you're doing.\n"
+                              "Enter the starting x coordinate: "))
+        start_y = float(input("Enter the starting y coordinate: "))
+        end_x = float(input("Enter the end x coordinate: "))
+        end_y = float(input("Enter the end y coordinate: "))
+
+        loading_time = time.time()
+
+        path = informed_search(lg, (start_x, start_y), (end_x, end_y))
+
+        print("\nTime to find shortest path: %.3f seconds" % (time.time() - loading_time))
 
         if path:
-            print(path)
+            lg.update_path_data(path)
+            lg.show_block()
+
+            print("\nYou will have to close the graph window to continue.")
+            plt.show(block=True)
         else:
             print("\nNo path was found between the start point and end point.")
 
         user = input("\nWould you like to change start again with different start and end points?"
-                     "\nThe program will terminate if you continue. (y/n) ")
+                     "\nThe program will terminate if you decline. (y/n) ")
 
         if str.lower(user)[0] == "n":
             break
