@@ -20,6 +20,7 @@ def main():
 
     print("\nTime to read and generate data: %.3f seconds" % (time.time() - loading_time))
 
+    # A while loop is used to allow the users to create and many graphs they they want
     while True:
         user = float(input("\nEnter the desired threshold for the block graph (between 0 and 1): "))
         lg.threshold = user
@@ -33,11 +34,13 @@ def main():
 
         print("\nYou will have to close the graph windows to continue.")
 
-        plt.show(block=True)
+        plt.show(block=True)  # We have to block like this to prevent the graph windows from closing instantly
 
         user = input("\nWould you like to change the grid size and print the new graphs?"
                      "\nYou will not be able to change the grid size and threshold anymore if you decline. (y/n) ")
 
+        # Very basic user input interpretation
+        # If the user doesn't input a word starting with y, then it is assumed a no was input and the loop is broken
         if str.lower(user)[0] == "n":
             break
         elif str.lower(user)[0] != "y":
@@ -54,15 +57,15 @@ def main():
 
         print("\nTime to generate data: %.3f seconds" % (time.time() - loading_time))
 
-    lg.set_coordinates_validity()
+    lg.set_coordinates_validity()  # Make the necessary calculations for the search to be done eg: invalid_coordinates
 
-    lg.windowed_graph(False)
+    lg.windowed_graph(False)  # The next graphs won't be windowed so the user won't have to close them to continue
 
     lg.show_scatter()
 
     lg.show_block()
 
-    lg.windowed_graph(True)
+    lg.windowed_graph(True)  # The next graph is going to be the found path, so it is better windowed
 
     print("\nTime to select start and end coordinates for the search.")
 
@@ -85,7 +88,7 @@ def main():
         print("\nTime to find shortest path: %.3f seconds" % (time.time() - loading_time))
 
         if path:
-            lg.update_path_data(path)
+            lg.update_path_data(path)   # We share the list of nodes that link start and end points so it can be showed
             lg.show_block()
 
             print("\nYou will have to close the graph window to continue.")
