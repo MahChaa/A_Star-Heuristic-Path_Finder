@@ -1,3 +1,8 @@
+# -------------------------------------------------------
+# Assignment 1
+# Written by Mahdi Chaari - 27219946
+# For COMP 472 Section ABKX – Summer 2020
+# --------------------------------------------------------
 import matplotlib.pyplot as plt
 import time
 
