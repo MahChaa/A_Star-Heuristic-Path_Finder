@@ -108,6 +108,8 @@ def main():
             print("I'll take that for as a no.")
             break
 
+    print("\nThank you for using this program.\nIt's time to terminate.")
+
 
 if __name__ == "__main__":
     main()
