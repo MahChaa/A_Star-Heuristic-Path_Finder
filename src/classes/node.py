@@ -30,6 +30,9 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
     start_coords = check_coordinates_validity(start_coords, graph)
     end_coords = check_coordinates_validity(end_coords, graph)
 
+    print("\nUsing starting coordinates: " + str(start_coords))
+    print("\nUsing end coordinates: " + str(end_coords))
+
     if start_coords in graph.invalid_coordinates or end_coords in graph.invalid_coordinates:
         print("\nDue to blocks, no path was found. Please change the points and try again.")
         return []
@@ -91,8 +94,8 @@ def informed_search(graph: LocationGrid, start_coords: tuple, end_coords: tuple)
                     open_list.put_nowait(next_node)
 
         if time.time() - search_time > 10:
-            print("Time is up. The optimal path was not found.")
-            break
+            print("\nTime is up. The optimal path was not found.")
+            return []
 
     print("\nDue to blocks, no path was found. Please change the points and try again.")
     return []
@@ -349,32 +352,49 @@ def get_move_cost(source, target, graph) -> float:
         return 1.5
 
 
+# noinspection DuplicatedCode
 def check_coordinates_validity(coords: tuple, graph) -> tuple:
     x_coord = coords[0]
     y_coord = coords[1]
+    x_axis = list(graph.x_axis_ticks) + [graph.x_axis_ticks[-1] + graph.grid_size]
+    y_axis = list(graph.y_axis_ticks) + [graph.y_axis_ticks[-1] + graph.grid_size]
 
-    if x_coord >= 0:
-        if x_coord >= len(graph.x_axis_ticks):
-            x_coord = graph.x_axis_ticks[-1] + graph.grid_size
+    if -len(graph.x_axis_ticks) <= x_coord < len(x_axis):
+        if x_coord >= len(x_axis):
+            x_coord = x_axis[-1]
+        elif x_coord <= -len(x_axis):
+            x_coord = x_axis[0]
         else:
-            x_coord = graph.x_axis_ticks[int(x_coord)]
+            x_coord = x_axis[int(x_coord)]
 
-    elif x_coord not in graph.x_axis_ticks:
-        for i, tick in enumerate(graph.x_axis_ticks):
-            if x_coord < tick:
-                x_coord = graph.x_axis_ticks[i - 1]
-                break
-
-    if y_coord >= 0 < graph.y_axis_ticks[0]:
-        if y_coord >= len(graph.y_axis_ticks):
-            y_coord = graph.y_axis_ticks[-1] + graph.grid_size
+    elif x_coord not in x_axis:
+        if x_coord < x_axis[0]:
+            x_coord = x_axis[0]
+        elif x_coord > x_axis[-1]:
+            x_coord = x_axis[-1]
         else:
-            y_coord = graph.y_axis_ticks[int(y_coord)]
+            for i, tick in enumerate(x_axis):
+                if x_coord < tick:
+                    x_coord = x_axis[i - 1]
+                    break
 
-    elif y_coord not in graph.y_axis_ticks:
-        for i, tick in enumerate(graph.y_axis_ticks):
-            if y_coord < tick:
-                y_coord = graph.y_axis_ticks[i - 1]
-                break
+    if -len(y_axis) <= y_coord < len(y_axis):
+        if y_coord >= len(y_axis):
+            y_coord = y_axis[-1]
+        elif y_coord <= -len(y_axis):
+            y_coord = y_axis[0]
+        else:
+            y_coord = y_axis[int(y_coord)]
+
+    elif y_coord not in y_axis:
+        if y_coord < y_axis[0]:
+            y_coord = y_axis[0]
+        elif y_coord > y_axis[-1]:
+            y_coord = y_axis[-1]
+        else:
+            for i, tick in enumerate(y_axis):
+                if y_coord < tick:
+                    y_coord = y_axis[i - 1]
+                    break
 
     return x_coord, y_coord

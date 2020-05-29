@@ -28,6 +28,9 @@ def main():
 
         lg.show_block()
 
+        print("\nAverage crime count per grid square: " + str(lg.crime_mean))
+        print("Crime count standard deviation: " + str(lg.crime_standard_deviation))
+
         print("\nYou will have to close the graph windows to continue.")
 
         plt.show(block=True)
